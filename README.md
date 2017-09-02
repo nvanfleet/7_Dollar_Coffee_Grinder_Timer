@@ -14,3 +14,6 @@ You can find more details to this project on [Instructable](https://www.instruct
 #### limitations:
 This program is is a quick coded version just to fulfill my needs. Please feel free to adapt it to your needs. I would be very grateful to include your inprovements.
 Thanks for your support!
+
+#### other stuff:
+Images used from: <a href="http://www.freepik.com/free-vector/coffee-labels-collection_974184.htm">Designed by Freepik</a>
