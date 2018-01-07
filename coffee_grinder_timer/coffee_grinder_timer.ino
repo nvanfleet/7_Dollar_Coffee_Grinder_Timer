@@ -29,18 +29,20 @@
 //------------------------------------------------------------------------------
 // Input Pins
 //
-const byte POTENTIOMETER = 0; //Analog Input 0
-const byte GRINDER = 0; //Digital Output 0
-const byte BUTTON = 1; //Digital Input 1
+const byte GRINDER = 0;           // Digital Output 0
+const byte BUTTON = 1;            // Digital Input 1
+const byte POTENTIOMETER_PIN = 2; // Analog Input pin 2
+
+const byte POTENTIOMETER = 1;     // Analog Input 0
 
 //------------------------------------------------------------------------------
 // Variables
 //
-const int min_grind_time = 4000; //minimum grinding time is 4 seconds
-const int grind_time_multiplier = 8; //to achieve 8 sec. potentiometer delay
+const int min_grind_time = 4000;
+const int grind_time_multiplier = 8;
 
-int potentiometer_value = 0;
-int grinding_time = 0;
+unsigned long time_to_stop = -1;
+int pot_value = 0;
 
 //------------------------------------------------------------------------------
 // Setup
@@ -49,20 +51,41 @@ void setup()
 {
   pinMode(GRINDER, OUTPUT);
   pinMode(BUTTON, INPUT);
+  pinMode(POTENTIOMETER_PIN, INPUT);
 }
 
 //------------------------------------------------------------------------------
 // Loop
 //
-void loop()
-{
-  potentiometer_value = analogRead(POTENTIOMETER);
-  grinding_time = min_grind_time + (potentiometer_value * grind_time_multiplier);
+void loop() {
+  unsigned long current_time = millis();
+  int grinder_running = digitalRead(GRINDER) == HIGH ? true : false;
+  pot_value = 1023 - analogRead(POTENTIOMETER);
+  
+  // Check if we have a time to stop
+  if (grinder_running && current_time >= time_to_stop) {
+    stop_grinder();
+    return;
+  }
 
-  if(digitalRead(BUTTON))
-  {
+  // Start the grinder and set a time to stop
+  if (digitalRead(BUTTON) && grinder_running == false) {
+    time_to_stop = current_time + min_grind_time + pot_value * grind_time_multiplier;
     digitalWrite(GRINDER, HIGH);
-    delay(grinding_time);
-    digitalWrite(GRINDER, LOW);
+    delay(1000);
+    return;
+  }
+
+  // Shut off the running grinder off early
+  if (digitalRead(BUTTON) && grinder_running) {
+    stop_grinder();
+    delay(1000);
+    return;
   }
 }
+
+void stop_grinder() {
+    time_to_stop = -1;
+    digitalWrite(GRINDER, LOW);
+}
+
